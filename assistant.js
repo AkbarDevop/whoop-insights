@@ -1,4 +1,5 @@
 (function () {
+  const ASSISTANT_NAME = "Pulse";
   const STORAGE_KEY = "whoop-insights-ai-consent";
   const MAX_HISTORY_TURNS = 4;
   const MAX_RECENT_ROWS = 45;
@@ -14,7 +15,7 @@
       {
         role: "assistant",
         text:
-          "Ask about recovery, sleep, strain, workouts, or trends in your uploaded data. I’ll stay grounded in the files you loaded and call out anything missing.",
+          "I’m Pulse. Ask me about recovery, sleep, strain, lifting, or what to focus on next. I’ll stay grounded in the files you loaded and I’ll call out gaps when I see them.",
       },
     ],
   };
@@ -31,16 +32,19 @@
     .wi-ai-fab {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       border: 0;
       border-radius: 999px;
-      padding: 14px 18px;
-      background: linear-gradient(135deg, #0f222c, #173642);
+      padding: 14px 18px 14px 16px;
+      background:
+        radial-gradient(circle at top left, rgba(121, 200, 255, 0.25), transparent 38%),
+        linear-gradient(135deg, #0e222e, #173a46);
       color: #f4fbff;
       box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
       cursor: pointer;
       font-weight: 700;
       font-size: 14px;
+      text-align: left;
     }
     .wi-ai-fab-dot {
       width: 10px;
@@ -48,6 +52,23 @@
       border-radius: 999px;
       background: #4de2c5;
       box-shadow: 0 0 0 6px rgba(77, 226, 197, 0.14);
+      flex: 0 0 auto;
+    }
+    .wi-ai-fab-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      line-height: 1.1;
+    }
+    .wi-ai-fab-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f4fbff;
+    }
+    .wi-ai-fab-subtitle {
+      font-size: 11px;
+      font-weight: 500;
+      color: #a9c3cc;
     }
     .wi-ai-panel {
       position: absolute;
@@ -73,7 +94,14 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       background:
         radial-gradient(circle at top left, rgba(77, 226, 197, 0.14), transparent 34%),
+        radial-gradient(circle at top right, rgba(121, 200, 255, 0.12), transparent 28%),
         linear-gradient(180deg, rgba(19, 40, 48, 0.95), rgba(8, 19, 25, 0.92));
+    }
+    .wi-ai-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
     }
     .wi-ai-kicker {
       display: inline-flex;
@@ -88,6 +116,19 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
+    .wi-ai-close {
+      border: 0;
+      border-radius: 999px;
+      width: 34px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.06);
+      color: #cce1e9;
+      font-size: 18px;
+      cursor: pointer;
+    }
     .wi-ai-title {
       margin: 12px 0 6px;
       font-size: 22px;
@@ -100,10 +141,87 @@
       line-height: 1.55;
       color: #9cb4bd;
     }
+    .wi-ai-status-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
     .wi-ai-status {
-      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
       font-size: 12px;
       color: #d6f4ee;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .wi-ai-status::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #7e9aa4;
+      box-shadow: 0 0 0 4px rgba(126, 154, 164, 0.14);
+      flex: 0 0 auto;
+    }
+    .wi-ai-status[data-tone="ready"]::before {
+      background: #4de2c5;
+      box-shadow: 0 0 0 4px rgba(77, 226, 197, 0.14);
+    }
+    .wi-ai-status[data-tone="thinking"]::before {
+      background: #79c8ff;
+      box-shadow: 0 0 0 4px rgba(121, 200, 255, 0.14);
+    }
+    .wi-ai-status[data-tone="warn"]::before {
+      background: #ffd166;
+      box-shadow: 0 0 0 4px rgba(255, 209, 102, 0.14);
+    }
+    .wi-ai-powered {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      color: #9dc1cf;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .wi-ai-source-strip {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .wi-ai-source-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      line-height: 1.2;
+      color: #dceef4;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .wi-ai-source-pill[data-tone="ready"] {
+      color: #defbf5;
+      background: rgba(77, 226, 197, 0.11);
+      border-color: rgba(77, 226, 197, 0.18);
+    }
+    .wi-ai-source-pill[data-tone="partial"] {
+      color: #ffe7af;
+      background: rgba(255, 209, 102, 0.09);
+      border-color: rgba(255, 209, 102, 0.16);
+    }
+    .wi-ai-note {
+      margin: 12px 0 0;
+      font-size: 11px;
+      line-height: 1.55;
+      color: #8ba5af;
     }
     .wi-ai-body {
       display: flex;
@@ -119,6 +237,27 @@
       gap: 12px;
       background: linear-gradient(180deg, rgba(8, 19, 25, 0.9), rgba(8, 19, 25, 1));
     }
+    .wi-ai-message {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-width: 88%;
+    }
+    .wi-ai-message[data-role="assistant"] {
+      align-self: flex-start;
+    }
+    .wi-ai-message[data-role="user"] {
+      align-self: flex-end;
+    }
+    .wi-ai-message-label {
+      font-size: 11px;
+      line-height: 1;
+      color: #8aa8b2;
+      padding: 0 2px;
+    }
+    .wi-ai-message[data-role="user"] .wi-ai-message-label {
+      text-align: right;
+    }
     .wi-ai-bubble {
       padding: 12px 14px;
       border-radius: 16px;
@@ -127,19 +266,62 @@
       white-space: pre-wrap;
     }
     .wi-ai-bubble[data-role="assistant"] {
-      align-self: flex-start;
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.06);
       color: #ecf7fb;
     }
     .wi-ai-bubble[data-role="user"] {
-      align-self: flex-end;
       background: rgba(77, 226, 197, 0.12);
       border: 1px solid rgba(77, 226, 197, 0.16);
       color: #f2fffc;
     }
+    .wi-ai-bubble[data-loading="true"] {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .wi-ai-typing {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .wi-ai-typing span {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #9dc1cf;
+      animation: wi-ai-bounce 1.05s infinite ease-in-out;
+    }
+    .wi-ai-typing span:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+    .wi-ai-typing span:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+    @keyframes wi-ai-bounce {
+      0%, 80%, 100% {
+        transform: scale(0.8);
+        opacity: 0.45;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
     .wi-ai-suggestions {
       padding: 0 16px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .wi-ai-suggestion-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #70909b;
+      font-weight: 700;
+    }
+    .wi-ai-suggestion-list {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
@@ -158,11 +340,21 @@
       border-top: 1px solid rgba(255, 255, 255, 0.08);
       background: rgba(7, 17, 22, 0.98);
     }
+    .wi-ai-consent-card {
+      margin-bottom: 12px;
+      padding: 12px 12px 10px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .wi-ai-consent-card[data-checked="true"] {
+      background: rgba(77, 226, 197, 0.08);
+      border-color: rgba(77, 226, 197, 0.16);
+    }
     .wi-ai-consent {
       display: flex;
       align-items: flex-start;
       gap: 10px;
-      margin-bottom: 12px;
       font-size: 12px;
       line-height: 1.5;
       color: #a8c1c9;
@@ -170,9 +362,15 @@
     .wi-ai-consent input {
       margin-top: 2px;
     }
+    .wi-ai-consent-note {
+      margin-top: 8px;
+      font-size: 11px;
+      line-height: 1.5;
+      color: #7f9aa4;
+    }
     .wi-ai-input {
       width: 100%;
-      min-height: 86px;
+      min-height: 96px;
       resize: vertical;
       border-radius: 16px;
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -230,6 +428,9 @@
         width: 100%;
         justify-content: center;
       }
+      .wi-ai-message {
+        max-width: 100%;
+      }
     }
   `;
   document.head.appendChild(style);
@@ -239,48 +440,66 @@
   shell.innerHTML = `
     <div class="wi-ai-panel" data-open="false">
       <div class="wi-ai-header">
-        <div class="wi-ai-kicker"><span class="wi-ai-fab-dot"></span> Gemini Assistant</div>
-        <div class="wi-ai-title">Ask about your fitness data</div>
-        <p class="wi-ai-subtitle">Grounded answers from your uploaded WHOOP, Strong, and route files. Apple Health XML is not yet fully summarized in v1 because those exports are often very large.</p>
-        <div class="wi-ai-status" data-ai-status>Waiting for uploaded data…</div>
+        <div class="wi-ai-topbar">
+          <div class="wi-ai-kicker"><span class="wi-ai-fab-dot"></span> ${ASSISTANT_NAME}</div>
+          <button type="button" class="wi-ai-close" data-ai-close aria-label="Close ${ASSISTANT_NAME}">×</button>
+        </div>
+        <div class="wi-ai-title">Your data-grounded training coach</div>
+        <p class="wi-ai-subtitle">${ASSISTANT_NAME} helps you make sense of recovery, sleep, strain, lifting, and trends across the files you loaded. Answers stay grounded in your data, not generic advice.</p>
+        <div class="wi-ai-status-row">
+          <div class="wi-ai-status" data-ai-status data-tone="muted">Waiting for uploaded data…</div>
+          <div class="wi-ai-powered">Powered by Gemini</div>
+        </div>
+        <div class="wi-ai-source-strip" data-ai-sources></div>
+        <p class="wi-ai-note">Only a structured summary is sent when you ask a question. Apple Health XML stays partial in v1 because those exports can be very large.</p>
       </div>
       <div class="wi-ai-body">
         <div class="wi-ai-messages" data-ai-messages></div>
         <div class="wi-ai-suggestions">
-          <button type="button" class="wi-ai-suggestion" data-question="What stands out in my recovery over the past 2 weeks?">Recovery trends</button>
-          <button type="button" class="wi-ai-suggestion" data-question="How is my sleep affecting my workouts lately?">Sleep vs workouts</button>
-          <button type="button" class="wi-ai-suggestion" data-question="What should I focus on tomorrow based on my latest data?">What to do tomorrow</button>
+          <div class="wi-ai-suggestion-label">Try asking</div>
+          <div class="wi-ai-suggestion-list" data-ai-suggestions></div>
         </div>
         <div class="wi-ai-footer">
-          <label class="wi-ai-consent">
-            <input type="checkbox" data-ai-consent />
-            <span>I agree to send a structured summary of my uploaded data and my question to Gemini for analysis. This is not medical advice.</span>
-          </label>
-          <textarea class="wi-ai-input" data-ai-input placeholder="Ask a question about recovery, sleep, strain, workouts, or trends in your data…"></textarea>
+          <div class="wi-ai-consent-card" data-ai-consent-card data-checked="false">
+            <label class="wi-ai-consent">
+              <input type="checkbox" data-ai-consent />
+              <span>I agree to send a structured summary of my loaded data and my question to Gemini for analysis. This is not medical advice.</span>
+            </label>
+            <div class="wi-ai-consent-note">Raw files stay in the browser. The assistant only sends a compact summary after you opt in.</div>
+          </div>
+          <textarea class="wi-ai-input" data-ai-input placeholder="Ask ${ASSISTANT_NAME} about recovery, sleep, strain, lifting, or your next 3-day focus…"></textarea>
           <div class="wi-ai-actions">
-            <div class="wi-ai-hint">Tip: ask for specifics like “last 7 days”, “red recovery days”, or “which workouts hit me hardest?”.</div>
-            <button type="button" class="wi-ai-send" data-ai-send>Ask Gemini</button>
+            <div class="wi-ai-hint" data-ai-hint>Tip: use exact windows like “last 7 days”, “red recovery days”, or “what should I focus on over the next 3 days?”. Press Enter to send.</div>
+            <button type="button" class="wi-ai-send" data-ai-send>Ask ${ASSISTANT_NAME}</button>
           </div>
         </div>
       </div>
     </div>
     <button type="button" class="wi-ai-fab" data-ai-toggle>
       <span class="wi-ai-fab-dot"></span>
-      <span>AI Assistant</span>
+      <span class="wi-ai-fab-copy">
+        <span class="wi-ai-fab-title">Ask ${ASSISTANT_NAME}</span>
+        <span class="wi-ai-fab-subtitle">Recovery, sleep, strain</span>
+      </span>
     </button>
   `;
   document.body.appendChild(shell);
 
   const panel = shell.querySelector(".wi-ai-panel");
   const toggle = shell.querySelector("[data-ai-toggle]");
+  const closeEl = shell.querySelector("[data-ai-close]");
   const messagesEl = shell.querySelector("[data-ai-messages]");
   const statusEl = shell.querySelector("[data-ai-status]");
+  const sourcesEl = shell.querySelector("[data-ai-sources]");
   const consentEl = shell.querySelector("[data-ai-consent]");
+  const consentCardEl = shell.querySelector("[data-ai-consent-card]");
   const inputEl = shell.querySelector("[data-ai-input]");
+  const hintEl = shell.querySelector("[data-ai-hint]");
   const sendEl = shell.querySelector("[data-ai-send]");
-  const suggestionEls = Array.from(shell.querySelectorAll("[data-question]"));
+  const suggestionsEl = shell.querySelector("[data-ai-suggestions]");
 
   consentEl.checked = state.consent;
+  consentCardEl.dataset.checked = String(state.consent);
 
   function normalizeKey(value) {
     return String(value || "")
@@ -352,24 +571,76 @@
     return Number.isFinite(number) ? number : null;
   }
 
-  function pickFirst(obj, candidates) {
+  function pickField(obj, candidates) {
     const keys = Object.keys(obj || {});
     const normalizedMap = new Map(keys.map((key) => [normalizeKey(key), key]));
 
     for (const candidate of candidates) {
       if (normalizedMap.has(candidate)) {
-        return obj[normalizedMap.get(candidate)];
+        const key = normalizedMap.get(candidate);
+        return { key, value: obj[key] };
       }
     }
 
     for (const candidate of candidates) {
       const match = Array.from(normalizedMap.entries()).find(([normalized]) => normalized.includes(candidate));
       if (match) {
-        return obj[match[1]];
+        return { key: match[1], value: obj[match[1]] };
       }
     }
 
-    return "";
+    return { key: "", value: "" };
+  }
+
+  function pickFirst(obj, candidates) {
+    return pickField(obj, candidates).value;
+  }
+
+  function toDurationHours(obj, candidates) {
+    const field = pickField(obj, candidates);
+    const value = toNumber(field.value);
+    if (!Number.isFinite(value)) {
+      return null;
+    }
+    const key = normalizeKey(field.key);
+    if (key.includes("ms")) {
+      return round(value / 3600000, 2);
+    }
+    if (key.includes("sec")) {
+      return round(value / 3600, 2);
+    }
+    if (key.includes("min")) {
+      return round(value / 60, 2);
+    }
+    if (key.includes("hour") || key.includes("hr")) {
+      return round(value, 2);
+    }
+    if (value > 40) {
+      return round(value / 60, 2);
+    }
+    return round(value, 2);
+  }
+
+  function toDurationMinutes(obj, candidates) {
+    const field = pickField(obj, candidates);
+    const value = toNumber(field.value);
+    if (!Number.isFinite(value)) {
+      return null;
+    }
+    const key = normalizeKey(field.key);
+    if (key.includes("ms")) {
+      return round(value / 60000, 1);
+    }
+    if (key.includes("sec")) {
+      return round(value / 60, 1);
+    }
+    if (key.includes("hour") || key.includes("hr")) {
+      return round(value * 60, 1);
+    }
+    if (value > 360) {
+      return round(value / 60, 1);
+    }
+    return round(value, 1);
   }
 
   function sortByDateDesc(rows, key) {
@@ -406,6 +677,21 @@
     return date.toISOString().slice(0, 10);
   }
 
+  function formatDateLabel(value) {
+    if (!value) {
+      return "";
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return String(value);
+    }
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+
   function summarizeWhoopCycles(rows) {
     const mapped = rows.map((row) => ({
       date: formatDate(pickFirst(row, ["cycle start time", "date"])),
@@ -434,7 +720,7 @@
   function summarizeSleeps(rows) {
     const mapped = rows.map((row) => ({
       date: formatDate(pickFirst(row, ["sleep onset", "cycle start time", "date"])),
-      sleepHours: round(toNumber(pickFirst(row, ["asleep duration min", "total sleep time ms", "total sleep time"])) / 60, 2),
+      sleepHours: toDurationHours(row, ["asleep duration min", "total sleep time ms", "total sleep time"]),
       sleepPerformance: toNumber(pickFirst(row, ["sleep performance", "sleep performance %"])),
       sleepEfficiency: toNumber(pickFirst(row, ["sleep efficiency", "sleep efficiency %"])),
       sleepConsistency: toNumber(pickFirst(row, ["sleep consistency", "sleep consistency %"])),
@@ -461,7 +747,7 @@
     const mapped = rows.map((row) => ({
       date: formatDate(pickFirst(row, ["workout start time", "cycle start time", "date"])),
       activity: pickFirst(row, ["activity name", "sport name", "sport"]),
-      durationMin: toNumber(pickFirst(row, ["duration min", "duration minutes", "duration"])),
+      durationMin: toDurationMinutes(row, ["duration min", "duration minutes", "duration"]),
       strain: toNumber(pickFirst(row, ["activity strain"])),
       avgHr: toNumber(pickFirst(row, ["average hr bpm", "average heart rate", "average hr"])),
       maxHr: toNumber(pickFirst(row, ["max hr bpm", "max heart rate", "max hr"])),
@@ -578,6 +864,18 @@
     };
   }
 
+  function findLatestSummaryDate(summary) {
+    const candidates = [
+      summary.whoopCycles?.recentRows?.[0]?.date,
+      summary.sleeps?.recentRows?.[0]?.date,
+      summary.whoopWorkouts?.recentRows?.[0]?.date,
+      summary.journal?.recentRows?.[0]?.date,
+      summary.strong?.recentSessions?.[0]?.date,
+    ].filter(Boolean);
+
+    return candidates.sort().slice(-1)[0] || "";
+  }
+
   function buildFingerprint(files) {
     return files
       .map((file) => `${file.name}:${file.size}:${file.lastModified}`)
@@ -588,6 +886,7 @@
   async function buildDatasetSummary(files) {
     const summary = {
       generatedAt: new Date().toISOString(),
+      latestDate: "",
       files: files.map((file) => ({
         name: file.name,
         sizeKb: round(file.size / 1024, 1),
@@ -627,44 +926,242 @@
       }
     }
 
+    summary.latestDate = findLatestSummaryDate(summary);
     return summary;
   }
 
-  function setStatus(text) {
+  function setStatus(text, tone) {
     statusEl.textContent = text;
+    statusEl.dataset.tone = tone || "muted";
+  }
+
+  function cleanAssistantText(text) {
+    return String(text || "")
+      .replace(/^\s*confidence score:.*$/gim, "")
+      .replace(/^\s*confidence:.*$/gim, "")
+      .replace(/^#{1,6}\s*/gm, "")
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/__(.*?)__/g, "$1")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  }
+
+  function latestTrackedDate() {
+    return state.summary?.latestDate || "";
+  }
+
+  function hasFileMatch(matcher) {
+    return state.files.some((file) => matcher(file.name.toLowerCase()));
+  }
+
+  function getSourceDescriptors() {
+    const descriptors = [];
+    if (state.summary?.whoopCycles || hasFileMatch((name) => name.includes("physiological_cycles"))) {
+      descriptors.push({ label: "WHOOP recovery", tone: "ready" });
+    }
+    if (state.summary?.sleeps || hasFileMatch((name) => name.includes("sleeps"))) {
+      descriptors.push({ label: "Sleep", tone: "ready" });
+    }
+    if (state.summary?.whoopWorkouts || hasFileMatch((name) => name.includes("workouts") && !name.includes("strong"))) {
+      descriptors.push({ label: "WHOOP workouts", tone: "ready" });
+    }
+    if (state.summary?.strong || hasFileMatch((name) => name.includes("strong"))) {
+      descriptors.push({ label: "Strong lifts", tone: "ready" });
+    }
+    const routeCount = state.files.filter((file) => file.name.toLowerCase().endsWith(".gpx")).length;
+    if (routeCount) {
+      descriptors.push({
+        label: `${routeCount} route${routeCount === 1 ? "" : "s"}`,
+        tone: "ready",
+      });
+    }
+    if (state.summary?.appleHealth?.uploaded || hasFileMatch((name) => name === "export.xml")) {
+      descriptors.push({ label: "Apple Health partial", tone: "partial" });
+    }
+    if (!descriptors.length) {
+      descriptors.push({ label: "Upload files to unlock answers", tone: "muted" });
+    }
+    return descriptors;
+  }
+
+  function getSuggestionItems() {
+    const anchoredDate = formatDateLabel(latestTrackedDate());
+    const items = [
+      {
+        label: "3-day focus",
+        question: anchoredDate
+          ? `Based on my data through ${anchoredDate}, what is the one thing I should focus on over the next 3 days?`
+          : "What is the one thing I should focus on over the next 3 days?",
+      },
+      {
+        label: "Recovery trend",
+        question: "What is dragging my recovery over the last 7 days?",
+      },
+    ];
+
+    if (state.summary?.sleeps || hasFileMatch((name) => name.includes("sleeps"))) {
+      items.push({
+        label: "Sleep impact",
+        question: "How is my sleep affecting recovery lately?",
+      });
+    }
+
+    if (state.summary?.strong || hasFileMatch((name) => name.includes("strong"))) {
+      items.push({
+        label: "Lifting vs recovery",
+        question: "Is my lifting load lining up with my recovery right now?",
+      });
+    } else if (state.summary?.whoopWorkouts || hasFileMatch((name) => name.includes("workouts"))) {
+      items.push({
+        label: "Hardest sessions",
+        question: "Which workouts seem to hit me hardest lately?",
+      });
+    } else {
+      items.push({
+        label: "Tomorrow plan",
+        question: anchoredDate
+          ? `Looking at my latest data through ${anchoredDate}, what should I do tomorrow?`
+          : "What should I do tomorrow based on my latest data?",
+      });
+    }
+
+    return items.slice(0, 4);
+  }
+
+  function renderSources() {
+    sourcesEl.innerHTML = "";
+    getSourceDescriptors().forEach((item) => {
+      const pill = document.createElement("span");
+      pill.className = "wi-ai-source-pill";
+      pill.dataset.tone = item.tone || "muted";
+      pill.textContent = item.label;
+      sourcesEl.appendChild(pill);
+    });
+  }
+
+  function renderSuggestions() {
+    suggestionsEl.innerHTML = "";
+    getSuggestionItems().forEach((item) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "wi-ai-suggestion";
+      button.textContent = item.label;
+      button.dataset.question = item.question;
+      button.disabled = state.isSending;
+      button.addEventListener("click", () => {
+        inputEl.value = item.question;
+        updateComposerState();
+        inputEl.focus();
+      });
+      suggestionsEl.appendChild(button);
+    });
+  }
+
+  function createMessageElement(message) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "wi-ai-message";
+    wrapper.dataset.role = message.role;
+
+    const label = document.createElement("div");
+    label.className = "wi-ai-message-label";
+    label.textContent = message.role === "assistant" ? ASSISTANT_NAME : "You";
+
+    const bubble = document.createElement("div");
+    bubble.className = "wi-ai-bubble";
+    bubble.dataset.role = message.role;
+    bubble.textContent = message.text;
+
+    wrapper.appendChild(label);
+    wrapper.appendChild(bubble);
+    return wrapper;
+  }
+
+  function createThinkingElement() {
+    const wrapper = document.createElement("div");
+    wrapper.className = "wi-ai-message";
+    wrapper.dataset.role = "assistant";
+
+    const label = document.createElement("div");
+    label.className = "wi-ai-message-label";
+    label.textContent = ASSISTANT_NAME;
+
+    const bubble = document.createElement("div");
+    bubble.className = "wi-ai-bubble";
+    bubble.dataset.role = "assistant";
+    bubble.dataset.loading = "true";
+    bubble.innerHTML = `
+      <span class="wi-ai-typing" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span>Looking across your loaded data…</span>
+    `;
+
+    wrapper.appendChild(label);
+    wrapper.appendChild(bubble);
+    return wrapper;
   }
 
   function renderMessages() {
     messagesEl.innerHTML = "";
     state.messages.forEach((message) => {
-      const bubble = document.createElement("div");
-      bubble.className = "wi-ai-bubble";
-      bubble.dataset.role = message.role;
-      bubble.textContent = message.text;
-      messagesEl.appendChild(bubble);
+      messagesEl.appendChild(createMessageElement(message));
     });
+    if (state.isSending) {
+      messagesEl.appendChild(createThinkingElement());
+    }
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
   function syncOpenState() {
     panel.dataset.open = String(state.isOpen);
+    toggle.setAttribute("aria-expanded", String(state.isOpen));
   }
 
   function appendMessage(role, text) {
-    state.messages.push({ role, text });
+    const messageText = role === "assistant" ? cleanAssistantText(text) : String(text || "").trim();
+    if (!messageText) {
+      return;
+    }
+    state.messages.push({ role, text: messageText });
     renderMessages();
   }
 
   function updateDataStatus() {
     if (!state.files.length) {
-      setStatus("Waiting for uploaded data…");
+      setStatus("Waiting for uploaded data…", "muted");
       return;
     }
-    const fileNames = state.files.map((file) => file.name).slice(0, 3);
-    const extraCount = Math.max(0, state.files.length - fileNames.length);
+
+    const latestDate = latestTrackedDate();
+    if (latestDate) {
+      setStatus(`Ready through ${formatDateLabel(latestDate)}. Ask a follow-up.`, "ready");
+      return;
+    }
+
     setStatus(
-      `Data ready from ${state.files.length} file${state.files.length === 1 ? "" : "s"}: ${fileNames.join(", ")}${extraCount ? ` + ${extraCount} more` : ""}`
+      `${state.files.length} file${state.files.length === 1 ? "" : "s"} loaded. ${ASSISTANT_NAME} will build context when you ask.`,
+      "ready"
     );
+  }
+
+  function updateComposerState() {
+    consentCardEl.dataset.checked = String(consentEl.checked);
+    sendEl.textContent = state.isSending ? `${ASSISTANT_NAME} is thinking…` : `Ask ${ASSISTANT_NAME}`;
+
+    let hint = `Tip: use exact windows like “last 7 days”, “red recovery days”, or “what should I focus on over the next 3 days?”. Press Enter to send.`;
+    if (!state.files.length) {
+      hint = "Upload WHOOP, Strong, or route files in the dashboard first, then Pulse can answer with your data.";
+    } else if (!consentEl.checked) {
+      hint = "Check the consent box to unlock AI answers from your loaded data.";
+    } else if (!inputEl.value.trim()) {
+      hint = "Try a specific question like “What changed in my recovery over the last 7 days?”";
+    } else if (state.isSending) {
+      hint = `${ASSISTANT_NAME} is reviewing the trends in your loaded files now.`;
+    }
+
+    hintEl.textContent = hint;
+    sendEl.disabled = state.isSending || !state.files.length || !consentEl.checked || !inputEl.value.trim();
+    Array.from(suggestionsEl.querySelectorAll("button")).forEach((button) => {
+      button.disabled = state.isSending;
+    });
   }
 
   async function ensureSummary() {
@@ -672,10 +1169,13 @@
     if (state.summary && state.fingerprint === fingerprint) {
       return state.summary;
     }
-    setStatus("Preparing a structured summary of your uploaded data…");
+    setStatus("Building your data context…", "thinking");
     state.summary = await buildDatasetSummary(state.files);
     state.fingerprint = fingerprint;
+    renderSources();
+    renderSuggestions();
     updateDataStatus();
+    updateComposerState();
     return state.summary;
   }
 
@@ -687,37 +1187,32 @@
     state.files = files;
     state.summary = null;
     state.fingerprint = "";
+    renderSources();
+    renderSuggestions();
     updateDataStatus();
+    updateComposerState();
+
+    ensureSummary().catch(() => {
+      setStatus("I found the files, but had trouble preparing the data context.", "warn");
+      renderSources();
+      renderSuggestions();
+      updateComposerState();
+    });
   }
 
   async function sendQuestion() {
     const question = inputEl.value.trim();
-
-    if (!state.files.length) {
-      appendMessage("assistant", "Upload data first, then I can answer questions grounded in those files.");
-      return;
-    }
-    if (!consentEl.checked) {
-      appendMessage("assistant", "Check the consent box first so I can send a structured summary of your data to Gemini.");
-      return;
-    }
-    if (!question) {
-      appendMessage("assistant", "Ask a specific question like “Why was my recovery lower this week?” or “What should I focus on tomorrow?”");
-      return;
-    }
-    if (state.isSending) {
+    if (!question || state.isSending || !state.files.length || !consentEl.checked) {
+      updateComposerState();
       return;
     }
 
     state.isSending = true;
-    sendEl.disabled = true;
-    suggestionEls.forEach((button) => {
-      button.disabled = true;
-    });
-
     appendMessage("user", question);
     inputEl.value = "";
-    setStatus("Thinking with Gemini…");
+    setStatus(`${ASSISTANT_NAME} is looking across your data…`, "thinking");
+    updateComposerState();
+    renderMessages();
 
     try {
       const datasetSummary = await ensureSummary();
@@ -743,47 +1238,57 @@
         throw new Error(payload.error || "Gemini request failed.");
       }
 
+      state.isSending = false;
+      updateComposerState();
       appendMessage("assistant", payload.answer || "I couldn’t generate an answer from the current data.");
-      setStatus("Data ready for follow-up questions.");
+      setStatus("Ready for another question.", "ready");
     } catch (error) {
+      state.isSending = false;
+      updateComposerState();
       appendMessage(
         "assistant",
         `I hit an issue while answering that. ${error instanceof Error ? error.message : "Unknown error."}`
       );
-      updateDataStatus();
-    } finally {
-      state.isSending = false;
-      sendEl.disabled = false;
-      suggestionEls.forEach((button) => {
-        button.disabled = false;
-      });
+      setStatus("Something went wrong while generating that answer.", "warn");
+      renderSources();
     }
   }
 
   toggle.addEventListener("click", () => {
     state.isOpen = !state.isOpen;
     syncOpenState();
+    if (state.isOpen) {
+      inputEl.focus();
+    }
+  });
+
+  closeEl.addEventListener("click", () => {
+    state.isOpen = false;
+    syncOpenState();
   });
 
   consentEl.addEventListener("change", () => {
     state.consent = consentEl.checked;
     localStorage.setItem(STORAGE_KEY, String(state.consent));
+    updateComposerState();
   });
 
   sendEl.addEventListener("click", sendQuestion);
 
+  inputEl.addEventListener("input", updateComposerState);
+
   inputEl.addEventListener("keydown", (event) => {
-    if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+    if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       sendQuestion();
     }
   });
 
-  suggestionEls.forEach((button) => {
-    button.addEventListener("click", () => {
-      inputEl.value = button.dataset.question || "";
-      inputEl.focus();
-    });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && state.isOpen) {
+      state.isOpen = false;
+      syncOpenState();
+    }
   });
 
   document.addEventListener(
@@ -798,6 +1303,9 @@
   );
 
   updateDataStatus();
+  renderSources();
+  renderSuggestions();
   renderMessages();
+  updateComposerState();
   syncOpenState();
 })();
