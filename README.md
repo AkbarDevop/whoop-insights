@@ -30,6 +30,7 @@ This repository currently ships the static launch bundle exported from Perplexit
 - Activity view for Apple Health and route activity
 - Insights view for correlations and generated findings
 - Explorer view for raw-data drilldowns
+- Opt-in Gemini assistant for grounded questions about uploaded data
 
 ## Local Preview
 
@@ -56,6 +57,8 @@ This repo is configured for Netlify static hosting.
 ## Privacy
 
 WHOOP Insights is designed so health data stays on the user's device during the current launch phase. Uploaded files are parsed locally in the browser and are not sent to an application backend.
+
+The Gemini assistant is opt-in. When a user enables it and asks a question, the app sends a structured summary of the uploaded data and the question to a Netlify function, which then calls Gemini server-side. The Gemini API key is not shipped to the browser.
 
 ## Repository Layout
 
