@@ -5,15 +5,12 @@
   const style = document.createElement("style");
   style.textContent = `
     .wi-launch-wrap {
-      border: 1px solid rgba(20, 184, 166, 0.18);
-      border-radius: 24px;
-      padding: 22px;
-      background:
-        radial-gradient(circle at top left, rgba(20, 184, 166, 0.16), transparent 32%),
-        radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 26%),
-        linear-gradient(180deg, rgba(10, 18, 26, 0.96), rgba(10, 18, 26, 0.9));
-      color: #eff9fb;
-      box-shadow: 0 24px 60px rgba(3, 10, 16, 0.24);
+      border: 1px solid hsl(var(--border));
+      border-radius: 16px;
+      padding: 20px;
+      background: hsl(var(--card));
+      color: hsl(var(--card-foreground));
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
     }
     .wi-launch-kicker {
       display: inline-flex;
@@ -21,8 +18,8 @@
       gap: 8px;
       padding: 6px 10px;
       border-radius: 999px;
-      background: rgba(20, 184, 166, 0.12);
-      color: #7bead9;
+      background: hsl(var(--primary) / 0.1);
+      color: hsl(var(--primary));
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.08em;
@@ -30,17 +27,17 @@
     }
     .wi-launch-title {
       margin: 14px 0 8px;
-      font-size: 27px;
-      line-height: 1.08;
-      font-weight: 800;
-      letter-spacing: -0.03em;
+      font-size: 22px;
+      line-height: 1.2;
+      font-weight: 700;
+      letter-spacing: -0.02em;
     }
     .wi-launch-copy {
       margin: 0;
       max-width: 56ch;
       font-size: 14px;
       line-height: 1.7;
-      color: #b8cbd3;
+      color: hsl(var(--muted-foreground));
     }
     .wi-launch-actions {
       display: flex;
@@ -55,7 +52,7 @@
       gap: 8px;
       min-height: 42px;
       padding: 0 16px;
-      border-radius: 999px;
+      border-radius: 10px;
       text-decoration: none;
       font-size: 13px;
       font-weight: 700;
@@ -65,18 +62,16 @@
       transform: translateY(-1px);
     }
     .wi-launch-button-primary {
-      background: linear-gradient(135deg, #4de2c5, #79c8ff);
-      color: #07131a;
-      box-shadow: 0 16px 32px rgba(77, 226, 197, 0.18);
+      background: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
     }
     .wi-launch-button-secondary {
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      background: rgba(255, 255, 255, 0.04);
-      color: #edf8fb;
+      border: 1px solid hsl(var(--border));
+      background: hsl(var(--muted) / 0.45);
+      color: hsl(var(--foreground));
     }
     .wi-launch-button-secondary:hover {
-      border-color: rgba(255, 255, 255, 0.22);
-      background: rgba(255, 255, 255, 0.08);
+      background: hsl(var(--muted) / 0.75);
     }
     .wi-launch-grid {
       display: grid;
@@ -84,17 +79,17 @@
       margin-top: 20px;
     }
     .wi-launch-card {
-      border-radius: 18px;
+      border-radius: 14px;
       padding: 16px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.07);
+      background: hsl(var(--muted) / 0.35);
+      border: 1px solid hsl(var(--border));
     }
     .wi-launch-label {
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: #8db0bc;
+      color: hsl(var(--muted-foreground));
       margin-bottom: 10px;
     }
     .wi-launch-pill-row {
@@ -110,28 +105,32 @@
       border-radius: 999px;
       font-size: 12px;
       line-height: 1;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(255, 255, 255, 0.04);
-      color: #e7f6fa;
+      border: 1px solid hsl(var(--border));
+      background: hsl(var(--background));
+      color: hsl(var(--foreground));
     }
     .wi-launch-pill[data-tone="ready"] {
-      color: #dcfff7;
-      border-color: rgba(77, 226, 197, 0.2);
-      background: rgba(77, 226, 197, 0.08);
+      color: hsl(var(--primary));
+      border-color: hsl(var(--primary) / 0.25);
+      background: hsl(var(--primary) / 0.1);
     }
     .wi-launch-pill[data-tone="next"] {
-      color: #edf7ff;
-      border-color: rgba(121, 200, 255, 0.18);
-      background: rgba(121, 200, 255, 0.08);
+      color: hsl(var(--foreground));
+      border-color: hsl(var(--border));
+      background: hsl(var(--background));
     }
     .wi-launch-privacy {
       margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid hsl(var(--border));
+      background: hsl(var(--muted) / 0.35);
       font-size: 12px;
       line-height: 1.65;
-      color: #a9c1ca;
+      color: hsl(var(--muted-foreground));
     }
     .wi-launch-privacy strong {
-      color: #f4fbff;
+      color: hsl(var(--foreground));
     }
     @media (min-width: 860px) {
       .wi-launch-grid {
@@ -141,10 +140,10 @@
     @media (max-width: 640px) {
       .wi-launch-wrap {
         padding: 18px;
-        border-radius: 20px;
+        border-radius: 14px;
       }
       .wi-launch-title {
-        font-size: 23px;
+        font-size: 20px;
       }
       .wi-launch-actions {
         flex-direction: column;
@@ -171,21 +170,21 @@
 
     const kicker = document.createElement("div");
     kicker.className = "wi-launch-kicker";
-    kicker.textContent = "Launch context";
+    kicker.textContent = "Before you upload";
 
     const title = document.createElement("h2");
     title.className = "wi-launch-title";
-    title.textContent = "See it working first, then upload your own data.";
+    title.textContent = "Try the live demo or upload your own exports.";
 
     const copy = document.createElement("p");
     copy.className = "wi-launch-copy";
     copy.textContent =
-      "WHOOP Insights connects recovery, sleep, lifting, activity, and routes in one place. Most people will want a quick look before exporting files, so the live demo is the fastest way to understand what the app does.";
+      "WHOOP Insights connects recovery, sleep, lifting, activity, and routes in one place. If you want to get the idea first, open the demo. If you already have your files, drop them in below.";
 
     const actions = document.createElement("div");
     actions.className = "wi-launch-actions";
     actions.innerHTML = `
-      <a class="wi-launch-button wi-launch-button-primary" href="${DEMO_URL}" target="_blank" rel="noreferrer">View live demo</a>
+      <a class="wi-launch-button wi-launch-button-primary" href="${DEMO_URL}" target="_blank" rel="noreferrer">Open demo dashboard</a>
       <a class="wi-launch-button wi-launch-button-secondary" href="${GITHUB_URL}" target="_blank" rel="noreferrer">Star on GitHub</a>
     `;
 
