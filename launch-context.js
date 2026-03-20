@@ -1,0 +1,255 @@
+(function () {
+  const DEMO_URL = "https://akbar-whoop-share-g87m2q.netlify.app";
+  const GITHUB_URL = "https://github.com/AkbarDevop/whoop-insights";
+
+  const style = document.createElement("style");
+  style.textContent = `
+    .wi-launch-wrap {
+      border: 1px solid rgba(20, 184, 166, 0.18);
+      border-radius: 24px;
+      padding: 22px;
+      background:
+        radial-gradient(circle at top left, rgba(20, 184, 166, 0.16), transparent 32%),
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 26%),
+        linear-gradient(180deg, rgba(10, 18, 26, 0.96), rgba(10, 18, 26, 0.9));
+      color: #eff9fb;
+      box-shadow: 0 24px 60px rgba(3, 10, 16, 0.24);
+    }
+    .wi-launch-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(20, 184, 166, 0.12);
+      color: #7bead9;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .wi-launch-title {
+      margin: 14px 0 8px;
+      font-size: 27px;
+      line-height: 1.08;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+    .wi-launch-copy {
+      margin: 0;
+      max-width: 56ch;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #b8cbd3;
+    }
+    .wi-launch-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .wi-launch-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 16px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+    .wi-launch-button:hover {
+      transform: translateY(-1px);
+    }
+    .wi-launch-button-primary {
+      background: linear-gradient(135deg, #4de2c5, #79c8ff);
+      color: #07131a;
+      box-shadow: 0 16px 32px rgba(77, 226, 197, 0.18);
+    }
+    .wi-launch-button-secondary {
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.04);
+      color: #edf8fb;
+    }
+    .wi-launch-button-secondary:hover {
+      border-color: rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .wi-launch-grid {
+      display: grid;
+      gap: 14px;
+      margin-top: 20px;
+    }
+    .wi-launch-card {
+      border-radius: 18px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .wi-launch-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #8db0bc;
+      margin-bottom: 10px;
+    }
+    .wi-launch-pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .wi-launch-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      line-height: 1;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      color: #e7f6fa;
+    }
+    .wi-launch-pill[data-tone="ready"] {
+      color: #dcfff7;
+      border-color: rgba(77, 226, 197, 0.2);
+      background: rgba(77, 226, 197, 0.08);
+    }
+    .wi-launch-pill[data-tone="next"] {
+      color: #edf7ff;
+      border-color: rgba(121, 200, 255, 0.18);
+      background: rgba(121, 200, 255, 0.08);
+    }
+    .wi-launch-privacy {
+      margin-top: 18px;
+      font-size: 12px;
+      line-height: 1.65;
+      color: #a9c1ca;
+    }
+    .wi-launch-privacy strong {
+      color: #f4fbff;
+    }
+    @media (min-width: 860px) {
+      .wi-launch-grid {
+        grid-template-columns: 1.3fr 1fr;
+      }
+    }
+    @media (max-width: 640px) {
+      .wi-launch-wrap {
+        padding: 18px;
+        border-radius: 20px;
+      }
+      .wi-launch-title {
+        font-size: 23px;
+      }
+      .wi-launch-actions {
+        flex-direction: column;
+      }
+      .wi-launch-button {
+        width: 100%;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  function createPill(label, tone) {
+    const pill = document.createElement("span");
+    pill.className = "wi-launch-pill";
+    pill.dataset.tone = tone;
+    pill.textContent = label;
+    return pill;
+  }
+
+  function buildLaunchBlock() {
+    const wrapper = document.createElement("section");
+    wrapper.className = "wi-launch-wrap";
+    wrapper.dataset.launchContext = "true";
+
+    const kicker = document.createElement("div");
+    kicker.className = "wi-launch-kicker";
+    kicker.textContent = "Launch context";
+
+    const title = document.createElement("h2");
+    title.className = "wi-launch-title";
+    title.textContent = "See it working first, then upload your own data.";
+
+    const copy = document.createElement("p");
+    copy.className = "wi-launch-copy";
+    copy.textContent =
+      "WHOOP Insights connects recovery, sleep, lifting, activity, and routes in one place. Most people will want a quick look before exporting files, so the live demo is the fastest way to understand what the app does.";
+
+    const actions = document.createElement("div");
+    actions.className = "wi-launch-actions";
+    actions.innerHTML = `
+      <a class="wi-launch-button wi-launch-button-primary" href="${DEMO_URL}" target="_blank" rel="noreferrer">View live demo</a>
+      <a class="wi-launch-button wi-launch-button-secondary" href="${GITHUB_URL}" target="_blank" rel="noreferrer">Star on GitHub</a>
+    `;
+
+    const grid = document.createElement("div");
+    grid.className = "wi-launch-grid";
+
+    const supportCard = document.createElement("div");
+    supportCard.className = "wi-launch-card";
+    supportCard.innerHTML = '<div class="wi-launch-label">Supported now</div>';
+    const supportRow = document.createElement("div");
+    supportRow.className = "wi-launch-pill-row";
+    ["WHOOP CSV", "Strong CSV", "Apple Health XML", "GPX routes", "Pulse AI assistant"].forEach((label) => {
+      supportRow.appendChild(createPill(label, "ready"));
+    });
+    supportCard.appendChild(supportRow);
+
+    const roadmapCard = document.createElement("div");
+    roadmapCard.className = "wi-launch-card";
+    roadmapCard.innerHTML = '<div class="wi-launch-label">Coming next</div>';
+    const roadmapRow = document.createElement("div");
+    roadmapRow.className = "wi-launch-pill-row";
+    ["Strava", "MyFitnessPal", "Oura", "Hevy"].forEach((label) => {
+      roadmapRow.appendChild(createPill(label, "next"));
+    });
+    roadmapCard.appendChild(roadmapRow);
+
+    grid.appendChild(supportCard);
+    grid.appendChild(roadmapCard);
+
+    const privacy = document.createElement("p");
+    privacy.className = "wi-launch-privacy";
+    privacy.innerHTML =
+      "<strong>Privacy note:</strong> core dashboard analysis stays in your browser. Pulse only sends a compact structured summary after you opt in, and your raw files stay local unless you choose to use AI.";
+
+    wrapper.appendChild(kicker);
+    wrapper.appendChild(title);
+    wrapper.appendChild(copy);
+    wrapper.appendChild(actions);
+    wrapper.appendChild(grid);
+    wrapper.appendChild(privacy);
+
+    return wrapper;
+  }
+
+  function injectLaunchContext() {
+    const uploadArea = document.querySelector('[data-testid="upload-area"]');
+    if (!uploadArea || document.querySelector("[data-launch-context]")) {
+      return;
+    }
+
+    const container = uploadArea.parentElement;
+    if (!container) {
+      return;
+    }
+
+    container.insertBefore(buildLaunchBlock(), uploadArea);
+  }
+
+  let attempts = 0;
+  const interval = window.setInterval(() => {
+    injectLaunchContext();
+    attempts += 1;
+    if (document.querySelector("[data-launch-context]") || attempts > 60) {
+      window.clearInterval(interval);
+    }
+  }, 300);
+})();
