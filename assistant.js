@@ -14,8 +14,7 @@
     messages: [
       {
         role: "assistant",
-        text:
-          "I’m Pulse. Ask me about recovery, sleep, strain, lifting, or what to focus on next. I’ll stay grounded in the files you loaded and I’ll call out gaps when I see them.",
+        text: "Ask about recovery, sleep, strain, or what to focus on next.",
       },
     ],
   };
@@ -139,14 +138,14 @@
     }
     .wi-ai-title {
       margin: 12px 0 6px;
-      font-size: 22px;
+      font-size: 19px;
       font-weight: 700;
       line-height: 1.15;
     }
     .wi-ai-subtitle {
       margin: 0;
-      font-size: 13px;
-      line-height: 1.55;
+      font-size: 12px;
+      line-height: 1.45;
       color: #9cb4bd;
     }
     .wi-ai-status-row {
@@ -154,7 +153,7 @@
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
-      margin-top: 14px;
+      margin-top: 12px;
     }
     .wi-ai-status {
       display: inline-flex;
@@ -188,47 +187,16 @@
       background: #ffd166;
       box-shadow: 0 0 0 4px rgba(255, 209, 102, 0.14);
     }
-    .wi-ai-powered {
-      display: inline-flex;
-      align-items: center;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 11px;
-      color: #9dc1cf;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-    }
     .wi-ai-source-strip {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-    .wi-ai-source-pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 7px 10px;
-      border-radius: 999px;
+      margin-top: 10px;
       font-size: 11px;
-      line-height: 1.2;
-      color: #dceef4;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-    }
-    .wi-ai-source-pill[data-tone="ready"] {
-      color: #defbf5;
-      background: rgba(77, 226, 197, 0.11);
-      border-color: rgba(77, 226, 197, 0.18);
-    }
-    .wi-ai-source-pill[data-tone="partial"] {
-      color: #ffe7af;
-      background: rgba(255, 209, 102, 0.09);
-      border-color: rgba(255, 209, 102, 0.16);
+      line-height: 1.5;
+      color: #92adb7;
     }
     .wi-ai-note {
-      margin: 12px 0 0;
+      margin: 10px 0 0;
       font-size: 11px;
-      line-height: 1.55;
+      line-height: 1.45;
       color: #8ba5af;
     }
     .wi-ai-body {
@@ -319,15 +287,8 @@
     .wi-ai-suggestions {
       padding: 0 16px 10px;
       display: flex;
-      flex-direction: column;
       gap: 8px;
-    }
-    .wi-ai-suggestion-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #70909b;
-      font-weight: 700;
+      flex-wrap: wrap;
     }
     .wi-ai-suggestion-list {
       display: flex;
@@ -373,7 +334,7 @@
     .wi-ai-consent-note {
       margin-top: 8px;
       font-size: 11px;
-      line-height: 1.5;
+      line-height: 1.35;
       color: #7f9aa4;
     }
     .wi-ai-input {
@@ -403,7 +364,7 @@
       font-size: 11px;
       line-height: 1.45;
       color: #7e9aa4;
-      max-width: 220px;
+      max-width: 240px;
     }
     .wi-ai-send {
       border: 0;
@@ -452,33 +413,31 @@
           <div class="wi-ai-kicker"><span class="wi-ai-fab-dot"></span> ${ASSISTANT_NAME}</div>
           <button type="button" class="wi-ai-close" data-ai-close aria-label="Close ${ASSISTANT_NAME}">×</button>
         </div>
-        <div class="wi-ai-title">Your data-grounded training coach</div>
-        <p class="wi-ai-subtitle">${ASSISTANT_NAME} helps you make sense of recovery, sleep, strain, lifting, and trends across the files you loaded. Answers stay grounded in your data, not generic advice.</p>
+        <div class="wi-ai-title">Ask ${ASSISTANT_NAME}</div>
+        <p class="wi-ai-subtitle">Answers based on your loaded data.</p>
         <div class="wi-ai-status-row">
           <div class="wi-ai-status" data-ai-status data-tone="muted">Waiting for uploaded data…</div>
-          <div class="wi-ai-powered">Powered by Gemini</div>
         </div>
         <div class="wi-ai-source-strip" data-ai-sources></div>
-        <p class="wi-ai-note">Only a structured summary is sent when you ask a question. Apple Health XML stays partial in v1 because those exports can be very large.</p>
+        <p class="wi-ai-note">AI is optional. Raw files stay local.</p>
       </div>
       <div class="wi-ai-body">
         <div class="wi-ai-messages" data-ai-messages></div>
         <div class="wi-ai-suggestions">
-          <div class="wi-ai-suggestion-label">Try asking</div>
           <div class="wi-ai-suggestion-list" data-ai-suggestions></div>
         </div>
         <div class="wi-ai-footer">
           <div class="wi-ai-consent-card" data-ai-consent-card data-checked="false">
             <label class="wi-ai-consent">
               <input type="checkbox" data-ai-consent />
-              <span>I agree to send a structured summary of my loaded data and my question to Gemini for analysis. This is not medical advice.</span>
+              <span>Send a compact summary to ${ASSISTANT_NAME}. Not medical advice.</span>
             </label>
-            <div class="wi-ai-consent-note">Raw files stay in the browser. The assistant only sends a compact summary after you opt in.</div>
+            <div class="wi-ai-consent-note">Raw files stay in your browser.</div>
           </div>
-          <textarea class="wi-ai-input" data-ai-input placeholder="Ask ${ASSISTANT_NAME} about recovery, sleep, strain, lifting, or your next 3-day focus…"></textarea>
+          <textarea class="wi-ai-input" data-ai-input placeholder="Ask about recovery, sleep, strain, or your next step…"></textarea>
           <div class="wi-ai-actions">
-            <div class="wi-ai-hint" data-ai-hint>Tip: use exact windows like “last 7 days”, “red recovery days”, or “what should I focus on over the next 3 days?”. Press Enter to send.</div>
-            <button type="button" class="wi-ai-send" data-ai-send>Ask ${ASSISTANT_NAME}</button>
+            <div class="wi-ai-hint" data-ai-hint>Try “What changed in my recovery over the last 7 days?”</div>
+            <button type="button" class="wi-ai-send" data-ai-send>Ask</button>
           </div>
         </div>
       </div>
@@ -487,7 +446,7 @@
       <span class="wi-ai-fab-dot"></span>
       <span class="wi-ai-fab-copy">
         <span class="wi-ai-fab-title">Ask ${ASSISTANT_NAME}</span>
-        <span class="wi-ai-fab-subtitle">Recovery, sleep, strain</span>
+        <span class="wi-ai-fab-subtitle">Your data</span>
       </span>
     </button>
   `;
@@ -1007,44 +966,42 @@
       },
     ];
 
-    if (state.summary?.sleeps || hasFileMatch((name) => name.includes("sleeps"))) {
-      items.push({
-        label: "Sleep impact",
-        question: "How is my sleep affecting recovery lately?",
-      });
-    }
-
     if (state.summary?.strong || hasFileMatch((name) => name.includes("strong"))) {
       items.push({
-        label: "Lifting vs recovery",
+        label: "Lifting",
         question: "Is my lifting load lining up with my recovery right now?",
+      });
+    } else if (state.summary?.sleeps || hasFileMatch((name) => name.includes("sleeps"))) {
+      items.push({
+        label: "Sleep",
+        question: "How is my sleep affecting recovery lately?",
       });
     } else if (state.summary?.whoopWorkouts || hasFileMatch((name) => name.includes("workouts"))) {
       items.push({
-        label: "Hardest sessions",
+        label: "Workouts",
         question: "Which workouts seem to hit me hardest lately?",
       });
     } else {
       items.push({
-        label: "Tomorrow plan",
+        label: "Tomorrow",
         question: anchoredDate
           ? `Looking at my latest data through ${anchoredDate}, what should I do tomorrow?`
           : "What should I do tomorrow based on my latest data?",
       });
     }
 
-    return items.slice(0, 4);
+    return items.slice(0, 2);
   }
 
   function renderSources() {
-    sourcesEl.innerHTML = "";
-    getSourceDescriptors().forEach((item) => {
-      const pill = document.createElement("span");
-      pill.className = "wi-ai-source-pill";
-      pill.dataset.tone = item.tone || "muted";
-      pill.textContent = item.label;
-      sourcesEl.appendChild(pill);
-    });
+    const descriptors = getSourceDescriptors().map((item) => item.label);
+    if (!state.files.length || !descriptors.length) {
+      sourcesEl.textContent = "";
+      return;
+    }
+    const visible = descriptors.slice(0, 4);
+    const extra = Math.max(0, descriptors.length - visible.length);
+    sourcesEl.textContent = `Using ${visible.join(" • ")}${extra ? ` +${extra}` : ""}`;
   }
 
   function renderSuggestions() {
@@ -1149,29 +1106,26 @@
 
     const latestDate = latestTrackedDate();
     if (latestDate) {
-      setStatus(`Ready through ${formatDateLabel(latestDate)}. Ask a follow-up.`, "ready");
+      setStatus(`Data ready through ${formatDateLabel(latestDate)}.`, "ready");
       return;
     }
 
-    setStatus(
-      `${state.files.length} file${state.files.length === 1 ? "" : "s"} loaded. ${ASSISTANT_NAME} will build context when you ask.`,
-      "ready"
-    );
+    setStatus(`${state.files.length} file${state.files.length === 1 ? "" : "s"} loaded.`, "ready");
   }
 
   function updateComposerState() {
     consentCardEl.dataset.checked = String(consentEl.checked);
-    sendEl.textContent = state.isSending ? `${ASSISTANT_NAME} is thinking…` : `Ask ${ASSISTANT_NAME}`;
+    sendEl.textContent = state.isSending ? "Thinking…" : "Ask";
 
-    let hint = `Tip: use exact windows like “last 7 days”, “red recovery days”, or “what should I focus on over the next 3 days?”. Press Enter to send.`;
+    let hint = "Ask about recovery, sleep, strain, or tomorrow.";
     if (!state.files.length) {
-      hint = "Upload WHOOP, Strong, or route files in the dashboard first, then Pulse can answer with your data.";
+      hint = "Upload files first.";
     } else if (!consentEl.checked) {
-      hint = "Check the consent box to unlock AI answers from your loaded data.";
+      hint = "Check the box to ask Pulse.";
     } else if (!inputEl.value.trim()) {
-      hint = "Try a specific question like “What changed in my recovery over the last 7 days?”";
+      hint = "Try “What changed in my recovery over the last 7 days?”";
     } else if (state.isSending) {
-      hint = `${ASSISTANT_NAME} is reviewing the trends in your loaded files now.`;
+      hint = `${ASSISTANT_NAME} is reading your data.`;
     }
 
     hintEl.textContent = hint;

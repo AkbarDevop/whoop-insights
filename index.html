@@ -30,6 +30,19 @@
     <meta name="twitter:description" content="Analyze WHOOP + Strong + Apple Health + GPX together. Smart insights, training load, and an optional opt-in AI assistant." />
     <meta name="twitter:image" content="https://whoop-insights.netlify.app/og-cover.png" />
     <meta name="theme-color" content="#07131a" />
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("whoop-insights-theme");
+          var theme = stored || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          if (theme === "dark") {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
+        } catch (error) {}
+      })();
+    </script>
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

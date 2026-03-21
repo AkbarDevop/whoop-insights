@@ -1,9 +1,46 @@
 (function () {
   const DEMO_URL = "https://akbar-whoop-share-g87m2q.netlify.app";
   const GITHUB_URL = "https://github.com/AkbarDevop/whoop-insights";
+  const THEME_KEY = "whoop-insights-theme";
+  const LIGHT_THEME_COLOR = "#eef2f6";
+  const DARK_THEME_COLOR = "#07131a";
 
   const style = document.createElement("style");
   style.textContent = `
+    .wi-global-theme-toggle {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 9997;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      border-radius: 999px;
+      border: 1px solid hsl(var(--border));
+      background: hsl(var(--card) / 0.92);
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+      backdrop-filter: blur(10px);
+    }
+    .wi-global-theme-toggle[data-visible="false"] {
+      display: none;
+    }
+    .wi-global-theme-option {
+      border: 0;
+      min-width: 64px;
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: transparent;
+      color: hsl(var(--muted-foreground));
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .wi-global-theme-option[data-active="true"] {
+      background: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+    }
     .wi-launch-wrap {
       border: 1px solid hsl(var(--border));
       border-radius: 16px;
@@ -24,6 +61,12 @@
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
+    }
+    .wi-launch-topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
     }
     .wi-launch-title {
       margin: 14px 0 8px;
@@ -166,6 +209,28 @@
     .wi-launch-privacy strong {
       color: hsl(var(--foreground));
     }
+    .recharts-tooltip-wrapper .recharts-default-tooltip {
+      background: hsl(var(--popover)) !important;
+      border: 1px solid hsl(var(--border)) !important;
+      border-radius: 12px !important;
+      box-shadow: 0 14px 34px rgba(15, 23, 42, 0.14) !important;
+      padding: 10px 12px !important;
+    }
+    .recharts-tooltip-wrapper .recharts-tooltip-label,
+    .recharts-tooltip-wrapper .recharts-tooltip-item,
+    .recharts-tooltip-wrapper .recharts-tooltip-item-name,
+    .recharts-tooltip-wrapper .recharts-tooltip-item-value,
+    .recharts-tooltip-wrapper .recharts-tooltip-item-separator {
+      color: hsl(var(--popover-foreground)) !important;
+      fill: hsl(var(--popover-foreground)) !important;
+    }
+    .recharts-tooltip-wrapper * {
+      color: hsl(var(--popover-foreground)) !important;
+    }
+    .recharts-tooltip-wrapper .recharts-tooltip-label {
+      margin-bottom: 4px !important;
+      font-weight: 700 !important;
+    }
     @media (min-width: 860px) {
       .wi-launch-grid {
         grid-template-columns: 1.3fr 1fr;
@@ -175,6 +240,18 @@
       .wi-launch-wrap {
         padding: 18px;
         border-radius: 14px;
+      }
+      .wi-global-theme-toggle {
+        top: 10px;
+        right: 10px;
+      }
+      .wi-global-theme-option {
+        min-width: 58px;
+      }
+      .wi-launch-topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
       }
       .wi-launch-title {
         font-size: 20px;
@@ -188,6 +265,49 @@
     }
   `;
   document.head.appendChild(style);
+
+  const themeToggle = document.createElement("div");
+  themeToggle.className = "wi-global-theme-toggle";
+  themeToggle.dataset.visible = "false";
+  themeToggle.innerHTML = `
+    <button type="button" class="wi-global-theme-option" data-theme="light">Light</button>
+    <button type="button" class="wi-global-theme-option" data-theme="dark">Dark</button>
+  `;
+  document.body.appendChild(themeToggle);
+
+  const themeButtons = Array.from(themeToggle.querySelectorAll("[data-theme]"));
+
+  function getCurrentTheme() {
+    try {
+      const stored = localStorage.getItem(THEME_KEY);
+      if (stored === "light" || stored === "dark") {
+        return stored;
+      }
+    } catch (error) {}
+    return document.documentElement.classList.contains("dark") ? "dark" : "light";
+  }
+
+  function setTheme(theme) {
+    const isDark = theme === "dark";
+    document.documentElement.classList.toggle("dark", isDark);
+    themeButtons.forEach((button) => {
+      button.dataset.active = String(button.dataset.theme === theme);
+    });
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute("content", isDark ? DARK_THEME_COLOR : LIGHT_THEME_COLOR);
+    }
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch (error) {}
+  }
+
+  setTheme(getCurrentTheme());
+  themeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      setTheme(button.dataset.theme);
+    });
+  });
 
   function createPill(label, tone) {
     const pill = document.createElement("span");
@@ -270,7 +390,11 @@
     disclosure.appendChild(summary);
     disclosure.appendChild(body);
 
-    wrapper.appendChild(kicker);
+    const topbar = document.createElement("div");
+    topbar.className = "wi-launch-topbar";
+    topbar.appendChild(kicker);
+
+    wrapper.appendChild(topbar);
     wrapper.appendChild(title);
     wrapper.appendChild(copy);
     wrapper.appendChild(actions);
@@ -281,6 +405,8 @@
 
   function injectLaunchContext() {
     const uploadArea = document.querySelector('[data-testid="upload-area"]');
+    themeToggle.dataset.visible = String(Boolean(uploadArea));
+
     if (!uploadArea || document.querySelector("[data-launch-context]")) {
       return;
     }
@@ -297,8 +423,13 @@
   const interval = window.setInterval(() => {
     injectLaunchContext();
     attempts += 1;
-    if (document.querySelector("[data-launch-context]") || attempts > 60) {
+    if (attempts > 60) {
       window.clearInterval(interval);
     }
   }, 300);
+
+  const observer = new MutationObserver(() => {
+    themeToggle.dataset.visible = String(Boolean(document.querySelector('[data-testid="upload-area"]')));
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
 })();
