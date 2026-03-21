@@ -73,10 +73,44 @@
     .wi-launch-button-secondary:hover {
       background: hsl(var(--muted) / 0.75);
     }
+    .wi-launch-disclosure {
+      margin-top: 16px;
+      border-radius: 14px;
+      border: 1px solid hsl(var(--border));
+      background: hsl(var(--muted) / 0.2);
+      overflow: hidden;
+    }
+    .wi-launch-summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: hsl(var(--foreground));
+    }
+    .wi-launch-summary::-webkit-details-marker {
+      display: none;
+    }
+    .wi-launch-chevron {
+      font-size: 16px;
+      line-height: 1;
+      color: hsl(var(--muted-foreground));
+      transition: transform 160ms ease;
+    }
+    .wi-launch-disclosure[open] .wi-launch-chevron {
+      transform: rotate(180deg);
+    }
+    .wi-launch-body {
+      padding: 0 16px 16px;
+    }
     .wi-launch-grid {
       display: grid;
       gap: 14px;
-      margin-top: 20px;
+      margin-top: 4px;
     }
     .wi-launch-card {
       border-radius: 14px;
@@ -145,11 +179,11 @@
       .wi-launch-title {
         font-size: 20px;
       }
-      .wi-launch-actions {
-        flex-direction: column;
-      }
       .wi-launch-button {
         width: 100%;
+      }
+      .wi-launch-actions {
+        flex-direction: column;
       }
     }
   `;
@@ -188,9 +222,6 @@
       <a class="wi-launch-button wi-launch-button-secondary" href="${GITHUB_URL}" target="_blank" rel="noreferrer">Star on GitHub</a>
     `;
 
-    const grid = document.createElement("div");
-    grid.className = "wi-launch-grid";
-
     const supportCard = document.createElement("div");
     supportCard.className = "wi-launch-card";
     supportCard.innerHTML = '<div class="wi-launch-label">Supported now</div>';
@@ -211,20 +242,39 @@
     });
     roadmapCard.appendChild(roadmapRow);
 
-    grid.appendChild(supportCard);
-    grid.appendChild(roadmapCard);
-
     const privacy = document.createElement("p");
     privacy.className = "wi-launch-privacy";
     privacy.innerHTML =
       "<strong>Privacy note:</strong> core dashboard analysis stays in your browser. Pulse only sends a compact structured summary after you opt in, and your raw files stay local unless you choose to use AI.";
 
+    const disclosure = document.createElement("details");
+    disclosure.className = "wi-launch-disclosure";
+
+    const summary = document.createElement("summary");
+    summary.className = "wi-launch-summary";
+    summary.innerHTML = `
+      <span>Supported files, privacy, and what’s next</span>
+      <span class="wi-launch-chevron">⌄</span>
+    `;
+
+    const body = document.createElement("div");
+    body.className = "wi-launch-body";
+
+    const grid = document.createElement("div");
+    grid.className = "wi-launch-grid";
+    grid.appendChild(supportCard);
+    grid.appendChild(roadmapCard);
+
+    body.appendChild(grid);
+    body.appendChild(privacy);
+    disclosure.appendChild(summary);
+    disclosure.appendChild(body);
+
     wrapper.appendChild(kicker);
     wrapper.appendChild(title);
     wrapper.appendChild(copy);
     wrapper.appendChild(actions);
-    wrapper.appendChild(grid);
-    wrapper.appendChild(privacy);
+    wrapper.appendChild(disclosure);
 
     return wrapper;
   }

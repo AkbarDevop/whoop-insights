@@ -28,6 +28,14 @@
       bottom: 20px;
       z-index: 9998;
       font-family: Inter, system-ui, sans-serif;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+    .wi-ai-shell[data-visible="false"] {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(10px);
     }
     .wi-ai-fab {
       display: inline-flex;
@@ -1115,6 +1123,15 @@
     toggle.setAttribute("aria-expanded", String(state.isOpen));
   }
 
+  function syncVisibility() {
+    const isVisible = state.files.length > 0;
+    shell.dataset.visible = String(isVisible);
+    if (!isVisible) {
+      state.isOpen = false;
+      syncOpenState();
+    }
+  }
+
   function appendMessage(role, text) {
     const messageText = role === "assistant" ? cleanAssistantText(text) : String(text || "").trim();
     if (!messageText) {
@@ -1187,6 +1204,7 @@
     state.files = files;
     state.summary = null;
     state.fingerprint = "";
+    syncVisibility();
     renderSources();
     renderSuggestions();
     updateDataStatus();
@@ -1303,6 +1321,7 @@
   );
 
   updateDataStatus();
+  syncVisibility();
   renderSources();
   renderSuggestions();
   renderMessages();
