@@ -27,19 +27,25 @@
     }
     .wi-global-theme-option {
       border: 0;
-      min-width: 64px;
+      width: 34px;
       height: 34px;
-      padding: 0 12px;
+      padding: 0;
       border-radius: 999px;
       background: transparent;
       color: hsl(var(--muted-foreground));
-      font-size: 12px;
-      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
     }
     .wi-global-theme-option[data-active="true"] {
       background: hsl(var(--primary));
       color: hsl(var(--primary-foreground));
+    }
+    .wi-global-theme-option svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
     }
     .wi-launch-wrap {
       border: 1px solid hsl(var(--border));
@@ -245,9 +251,6 @@
         top: 10px;
         right: 10px;
       }
-      .wi-global-theme-option {
-        min-width: 58px;
-      }
       .wi-launch-topbar {
         flex-direction: column;
         align-items: flex-start;
@@ -270,8 +273,17 @@
   themeToggle.className = "wi-global-theme-toggle";
   themeToggle.dataset.visible = "false";
   themeToggle.innerHTML = `
-    <button type="button" class="wi-global-theme-option" data-theme="light">Light</button>
-    <button type="button" class="wi-global-theme-option" data-theme="dark">Dark</button>
+    <button type="button" class="wi-global-theme-option" data-theme="light" aria-label="Switch to light mode" title="Light mode">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.5" stroke-width="1.8"></circle>
+        <path d="M12 2.5v2.5M12 19v2.5M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M2.5 12H5M19 12h2.5M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77" stroke-width="1.8" stroke-linecap="round"></path>
+      </svg>
+    </button>
+    <button type="button" class="wi-global-theme-option" data-theme="dark" aria-label="Switch to dark mode" title="Dark mode">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M20 15.2A8.5 8.5 0 1 1 8.8 4 7 7 0 0 0 20 15.2Z" stroke-width="1.8" stroke-linejoin="round"></path>
+      </svg>
+    </button>
   `;
   document.body.appendChild(themeToggle);
 
