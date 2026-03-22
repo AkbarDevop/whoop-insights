@@ -14,7 +14,7 @@
     messages: [
       {
         role: "assistant",
-        text: "Ask about recovery, sleep, strain, or what to focus on next.",
+        text: "Ask about your data.",
       },
     ],
   };
@@ -138,7 +138,7 @@
     }
     .wi-ai-title {
       margin: 12px 0 6px;
-      font-size: 19px;
+      font-size: 18px;
       font-weight: 700;
       line-height: 1.15;
     }
@@ -192,12 +192,6 @@
       font-size: 11px;
       line-height: 1.5;
       color: #92adb7;
-    }
-    .wi-ai-note {
-      margin: 10px 0 0;
-      font-size: 11px;
-      line-height: 1.45;
-      color: #8ba5af;
     }
     .wi-ai-body {
       display: flex;
@@ -332,10 +326,7 @@
       margin-top: 2px;
     }
     .wi-ai-consent-note {
-      margin-top: 8px;
-      font-size: 11px;
-      line-height: 1.35;
-      color: #7f9aa4;
+      display: none;
     }
     .wi-ai-input {
       width: 100%;
@@ -413,13 +404,12 @@
           <div class="wi-ai-kicker"><span class="wi-ai-fab-dot"></span> ${ASSISTANT_NAME}</div>
           <button type="button" class="wi-ai-close" data-ai-close aria-label="Close ${ASSISTANT_NAME}">×</button>
         </div>
-        <div class="wi-ai-title">Ask ${ASSISTANT_NAME}</div>
-        <p class="wi-ai-subtitle">Answers based on your loaded data.</p>
+        <div class="wi-ai-title">${ASSISTANT_NAME}</div>
+        <p class="wi-ai-subtitle">Your data.</p>
         <div class="wi-ai-status-row">
           <div class="wi-ai-status" data-ai-status data-tone="muted">Waiting for uploaded data…</div>
         </div>
         <div class="wi-ai-source-strip" data-ai-sources></div>
-        <p class="wi-ai-note">AI is optional. Raw files stay local.</p>
       </div>
       <div class="wi-ai-body">
         <div class="wi-ai-messages" data-ai-messages></div>
@@ -430,13 +420,12 @@
           <div class="wi-ai-consent-card" data-ai-consent-card data-checked="false">
             <label class="wi-ai-consent">
               <input type="checkbox" data-ai-consent />
-              <span>Send a compact summary to ${ASSISTANT_NAME}. Not medical advice.</span>
+              <span>Allow AI summary. Not medical advice.</span>
             </label>
-            <div class="wi-ai-consent-note">Raw files stay in your browser.</div>
           </div>
-          <textarea class="wi-ai-input" data-ai-input placeholder="Ask about recovery, sleep, strain, or your next step…"></textarea>
+          <textarea class="wi-ai-input" data-ai-input placeholder="Ask a question…"></textarea>
           <div class="wi-ai-actions">
-            <div class="wi-ai-hint" data-ai-hint>Try “What changed in my recovery over the last 7 days?”</div>
+            <div class="wi-ai-hint" data-ai-hint>Example: recovery over 7 days</div>
             <button type="button" class="wi-ai-send" data-ai-send>Ask</button>
           </div>
         </div>
@@ -955,42 +944,18 @@
     const anchoredDate = formatDateLabel(latestTrackedDate());
     const items = [
       {
-        label: "3-day focus",
+        label: "Next step",
         question: anchoredDate
           ? `Based on my data through ${anchoredDate}, what is the one thing I should focus on over the next 3 days?`
           : "What is the one thing I should focus on over the next 3 days?",
       },
       {
-        label: "Recovery trend",
+        label: "Recovery",
         question: "What is dragging my recovery over the last 7 days?",
       },
     ];
 
-    if (state.summary?.strong || hasFileMatch((name) => name.includes("strong"))) {
-      items.push({
-        label: "Lifting",
-        question: "Is my lifting load lining up with my recovery right now?",
-      });
-    } else if (state.summary?.sleeps || hasFileMatch((name) => name.includes("sleeps"))) {
-      items.push({
-        label: "Sleep",
-        question: "How is my sleep affecting recovery lately?",
-      });
-    } else if (state.summary?.whoopWorkouts || hasFileMatch((name) => name.includes("workouts"))) {
-      items.push({
-        label: "Workouts",
-        question: "Which workouts seem to hit me hardest lately?",
-      });
-    } else {
-      items.push({
-        label: "Tomorrow",
-        question: anchoredDate
-          ? `Looking at my latest data through ${anchoredDate}, what should I do tomorrow?`
-          : "What should I do tomorrow based on my latest data?",
-      });
-    }
-
-    return items.slice(0, 2);
+    return items;
   }
 
   function renderSources() {
@@ -999,9 +964,7 @@
       sourcesEl.textContent = "";
       return;
     }
-    const visible = descriptors.slice(0, 4);
-    const extra = Math.max(0, descriptors.length - visible.length);
-    sourcesEl.textContent = `Using ${visible.join(" • ")}${extra ? ` +${extra}` : ""}`;
+    sourcesEl.textContent = `${descriptors.length} source${descriptors.length === 1 ? "" : "s"} loaded`;
   }
 
   function renderSuggestions() {
@@ -1106,7 +1069,7 @@
 
     const latestDate = latestTrackedDate();
     if (latestDate) {
-      setStatus(`Data ready through ${formatDateLabel(latestDate)}.`, "ready");
+      setStatus(`Ready · ${formatDateLabel(latestDate)}`, "ready");
       return;
     }
 
@@ -1117,15 +1080,15 @@
     consentCardEl.dataset.checked = String(consentEl.checked);
     sendEl.textContent = state.isSending ? "Thinking…" : "Ask";
 
-    let hint = "Ask about recovery, sleep, strain, or tomorrow.";
+    let hint = "Example: recovery over 7 days";
     if (!state.files.length) {
       hint = "Upload files first.";
     } else if (!consentEl.checked) {
-      hint = "Check the box to ask Pulse.";
+      hint = "Enable AI to ask.";
     } else if (!inputEl.value.trim()) {
-      hint = "Try “What changed in my recovery over the last 7 days?”";
+      hint = "Example: recovery over 7 days";
     } else if (state.isSending) {
-      hint = `${ASSISTANT_NAME} is reading your data.`;
+      hint = "Thinking…";
     }
 
     hintEl.textContent = hint;
