@@ -11,12 +11,7 @@
     isOpen: false,
     isSending: false,
     consent: localStorage.getItem(STORAGE_KEY) === "true",
-    messages: [
-      {
-        role: "assistant",
-        text: "Ask about your data.",
-      },
-    ],
+    messages: [],
   };
 
   const style = document.createElement("style");
@@ -71,11 +66,6 @@
       font-size: 14px;
       font-weight: 700;
       color: #f4fbff;
-    }
-    .wi-ai-fab-subtitle {
-      font-size: 11px;
-      font-weight: 500;
-      color: #a9c3cc;
     }
     .wi-ai-panel {
       position: absolute;
@@ -142,18 +132,15 @@
       font-weight: 700;
       line-height: 1.15;
     }
-    .wi-ai-subtitle {
-      margin: 0;
-      font-size: 12px;
-      line-height: 1.45;
-      color: #9cb4bd;
-    }
     .wi-ai-status-row {
       display: flex;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
       margin-top: 12px;
+    }
+    .wi-ai-status-row[data-visible="false"] {
+      display: none;
     }
     .wi-ai-status {
       display: inline-flex;
@@ -187,12 +174,6 @@
       background: #ffd166;
       box-shadow: 0 0 0 4px rgba(255, 209, 102, 0.14);
     }
-    .wi-ai-source-strip {
-      margin-top: 10px;
-      font-size: 11px;
-      line-height: 1.5;
-      color: #92adb7;
-    }
     .wi-ai-body {
       display: flex;
       flex-direction: column;
@@ -206,6 +187,9 @@
       flex-direction: column;
       gap: 12px;
       background: linear-gradient(180deg, rgba(8, 19, 25, 0.9), rgba(8, 19, 25, 1));
+    }
+    .wi-ai-messages:empty {
+      display: none;
     }
     .wi-ai-message {
       display: flex;
@@ -279,24 +263,22 @@
       }
     }
     .wi-ai-suggestions {
-      padding: 0 16px 10px;
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+      padding: 14px 16px 10px;
     }
     .wi-ai-suggestion-list {
-      display: flex;
+      display: grid;
       gap: 8px;
-      flex-wrap: wrap;
     }
     .wi-ai-suggestion {
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 999px;
-      padding: 8px 12px;
+      border-radius: 16px;
+      padding: 10px 12px;
       background: rgba(255, 255, 255, 0.04);
       color: #d3e9ef;
       cursor: pointer;
       font-size: 12px;
+      line-height: 1.45;
+      text-align: left;
     }
     .wi-ai-footer {
       padding: 14px 16px 16px;
@@ -305,32 +287,29 @@
     }
     .wi-ai-consent-card {
       margin-bottom: 12px;
-      padding: 12px 12px 10px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      border: 0;
     }
     .wi-ai-consent-card[data-checked="true"] {
-      background: rgba(77, 226, 197, 0.08);
-      border-color: rgba(77, 226, 197, 0.16);
+      background: transparent;
+      border-color: transparent;
     }
     .wi-ai-consent {
       display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 12px;
-      line-height: 1.5;
-      color: #a8c1c9;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      line-height: 1.3;
+      color: #89a4ae;
     }
     .wi-ai-consent input {
-      margin-top: 2px;
-    }
-    .wi-ai-consent-note {
-      display: none;
+      margin-top: 0;
     }
     .wi-ai-input {
       width: 100%;
-      min-height: 96px;
+      min-height: 76px;
       resize: vertical;
       border-radius: 16px;
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -346,16 +325,9 @@
     }
     .wi-ai-actions {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+      justify-content: flex-end;
       gap: 12px;
       margin-top: 10px;
-    }
-    .wi-ai-hint {
-      font-size: 11px;
-      line-height: 1.45;
-      color: #7e9aa4;
-      max-width: 240px;
     }
     .wi-ai-send {
       border: 0;
@@ -400,16 +372,14 @@
   shell.innerHTML = `
     <div class="wi-ai-panel" data-open="false">
       <div class="wi-ai-header">
-        <div class="wi-ai-topbar">
+      <div class="wi-ai-topbar">
           <div class="wi-ai-kicker"><span class="wi-ai-fab-dot"></span> ${ASSISTANT_NAME}</div>
           <button type="button" class="wi-ai-close" data-ai-close aria-label="Close ${ASSISTANT_NAME}">×</button>
         </div>
         <div class="wi-ai-title">${ASSISTANT_NAME}</div>
-        <p class="wi-ai-subtitle">Your data.</p>
-        <div class="wi-ai-status-row">
+        <div class="wi-ai-status-row" data-visible="false">
           <div class="wi-ai-status" data-ai-status data-tone="muted">Waiting for uploaded data…</div>
         </div>
-        <div class="wi-ai-source-strip" data-ai-sources></div>
       </div>
       <div class="wi-ai-body">
         <div class="wi-ai-messages" data-ai-messages></div>
@@ -418,14 +388,13 @@
         </div>
         <div class="wi-ai-footer">
           <div class="wi-ai-consent-card" data-ai-consent-card data-checked="false">
-            <label class="wi-ai-consent">
+            <label class="wi-ai-consent" title="Uses Gemini with a compact summary. Raw files stay local. Not medical advice.">
               <input type="checkbox" data-ai-consent />
-              <span>Allow AI summary. Not medical advice.</span>
+              <span>Use AI</span>
             </label>
           </div>
           <textarea class="wi-ai-input" data-ai-input placeholder="Ask a question…"></textarea>
           <div class="wi-ai-actions">
-            <div class="wi-ai-hint" data-ai-hint>Example: recovery over 7 days</div>
             <button type="button" class="wi-ai-send" data-ai-send>Ask</button>
           </div>
         </div>
@@ -435,7 +404,6 @@
       <span class="wi-ai-fab-dot"></span>
       <span class="wi-ai-fab-copy">
         <span class="wi-ai-fab-title">Ask ${ASSISTANT_NAME}</span>
-        <span class="wi-ai-fab-subtitle">Your data</span>
       </span>
     </button>
   `;
@@ -446,11 +414,10 @@
   const closeEl = shell.querySelector("[data-ai-close]");
   const messagesEl = shell.querySelector("[data-ai-messages]");
   const statusEl = shell.querySelector("[data-ai-status]");
-  const sourcesEl = shell.querySelector("[data-ai-sources]");
+  const statusRowEl = statusEl.parentElement;
   const consentEl = shell.querySelector("[data-ai-consent]");
   const consentCardEl = shell.querySelector("[data-ai-consent-card]");
   const inputEl = shell.querySelector("[data-ai-input]");
-  const hintEl = shell.querySelector("[data-ai-hint]");
   const sendEl = shell.querySelector("[data-ai-send]");
   const suggestionsEl = shell.querySelector("[data-ai-suggestions]");
 
@@ -887,8 +854,10 @@
   }
 
   function setStatus(text, tone) {
-    statusEl.textContent = text;
+    const value = String(text || "").trim();
+    statusEl.textContent = value;
     statusEl.dataset.tone = tone || "muted";
+    statusRowEl.dataset.visible = value ? "true" : "false";
   }
 
   function cleanAssistantText(text) {
@@ -941,43 +910,28 @@
   }
 
   function getSuggestionItems() {
-    const anchoredDate = formatDateLabel(latestTrackedDate());
-    const items = [
-      {
-        label: "Next step",
-        question: anchoredDate
-          ? `Based on my data through ${anchoredDate}, what is the one thing I should focus on over the next 3 days?`
-          : "What is the one thing I should focus on over the next 3 days?",
-      },
-      {
-        label: "Recovery",
-        question: "What is dragging my recovery over the last 7 days?",
-      },
+    return [
+      "What changed in my recovery over the last 7 days?",
+      "How is my sleep affecting recovery lately?",
+      "Which workouts hit me hardest lately?",
     ];
-
-    return items;
   }
 
   function renderSources() {
-    const descriptors = getSourceDescriptors().map((item) => item.label);
-    if (!state.files.length || !descriptors.length) {
-      sourcesEl.textContent = "";
-      return;
-    }
-    sourcesEl.textContent = `${descriptors.length} source${descriptors.length === 1 ? "" : "s"} loaded`;
+    return;
   }
 
   function renderSuggestions() {
     suggestionsEl.innerHTML = "";
-    getSuggestionItems().forEach((item) => {
+    getSuggestionItems().forEach((question) => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "wi-ai-suggestion";
-      button.textContent = item.label;
-      button.dataset.question = item.question;
+      button.textContent = question;
+      button.dataset.question = question;
       button.disabled = state.isSending;
       button.addEventListener("click", () => {
-        inputEl.value = item.question;
+        inputEl.value = question;
         updateComposerState();
         inputEl.focus();
       });
@@ -1063,35 +1017,16 @@
 
   function updateDataStatus() {
     if (!state.files.length) {
-      setStatus("Waiting for uploaded data…", "muted");
+      setStatus("", "muted");
       return;
     }
 
-    const latestDate = latestTrackedDate();
-    if (latestDate) {
-      setStatus(`Ready · ${formatDateLabel(latestDate)}`, "ready");
-      return;
-    }
-
-    setStatus(`${state.files.length} file${state.files.length === 1 ? "" : "s"} loaded.`, "ready");
+    setStatus("", "ready");
   }
 
   function updateComposerState() {
     consentCardEl.dataset.checked = String(consentEl.checked);
     sendEl.textContent = state.isSending ? "Thinking…" : "Ask";
-
-    let hint = "Example: recovery over 7 days";
-    if (!state.files.length) {
-      hint = "Upload files first.";
-    } else if (!consentEl.checked) {
-      hint = "Enable AI to ask.";
-    } else if (!inputEl.value.trim()) {
-      hint = "Example: recovery over 7 days";
-    } else if (state.isSending) {
-      hint = "Thinking…";
-    }
-
-    hintEl.textContent = hint;
     sendEl.disabled = state.isSending || !state.files.length || !consentEl.checked || !inputEl.value.trim();
     Array.from(suggestionsEl.querySelectorAll("button")).forEach((button) => {
       button.disabled = state.isSending;
@@ -1145,7 +1080,7 @@
     state.isSending = true;
     appendMessage("user", question);
     inputEl.value = "";
-    setStatus(`${ASSISTANT_NAME} is looking across your data…`, "thinking");
+      setStatus(`${ASSISTANT_NAME} is thinking…`, "thinking");
     updateComposerState();
     renderMessages();
 
@@ -1176,7 +1111,7 @@
       state.isSending = false;
       updateComposerState();
       appendMessage("assistant", payload.answer || "I couldn’t generate an answer from the current data.");
-      setStatus("Ready for another question.", "ready");
+      setStatus("", "ready");
     } catch (error) {
       state.isSending = false;
       updateComposerState();
