@@ -265,6 +265,9 @@
     .wi-ai-suggestions {
       padding: 14px 16px 10px;
     }
+    .wi-ai-suggestions[data-hidden="true"] {
+      display: none;
+    }
     .wi-ai-suggestion-list {
       display: grid;
       gap: 8px;
@@ -989,6 +992,7 @@
     if (state.isSending) {
       messagesEl.appendChild(createThinkingElement());
     }
+    suggestionsEl.dataset.hidden = state.messages.length > 0 ? "true" : "false";
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
@@ -1087,8 +1091,8 @@
     try {
       const datasetSummary = await ensureSummary();
       const conversation = state.messages
-        .filter((message) => message.role === "user" || message.role === "assistant")
-        .slice(-MAX_HISTORY_TURNS * 2);
+        .filter((message) => message.role === "user")
+        .slice(-MAX_HISTORY_TURNS);
 
       const response = await fetch("/.netlify/functions/gemini-assistant", {
         method: "POST",
