@@ -1,4 +1,5 @@
 const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || "gemini-2.5-flash-lite";
 
 function json(statusCode, body) {
   return {
@@ -44,8 +45,85 @@ function looksTruncated(answer, finishReason) {
   return false;
 }
 
-async function requestGemini(apiKey, systemInstruction, prompt, overrides = {}) {
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
+function sliceRows(rows, limit) {
+  return Array.isArray(rows) ? rows.slice(0, limit) : [];
+}
+
+function compactDatasetSummary(summary, question) {
+  const q = String(question || "").toLowerCase();
+  const wantsSleep = /(sleep|recovery|hrv|rhr|resting heart)/.test(q);
+  const wantsTraining = /(workout|lift|lifting|strain|strong|exercise|volume|pr|load|recovery)/.test(q);
+  const wantsRoutes = /(route|run|walk|cardio|steps|activity|vo2|gpx)/.test(q);
+  const wantsJournal = /(journal|creatine|supplement|vitamin|caffeine|habit)/.test(q);
+
+  const compact = {
+    generatedAt: summary?.generatedAt,
+    latestDate: summary?.latestDate,
+    files: Array.isArray(summary?.files)
+      ? summary.files.map((file) => ({ name: file.name, sizeKb: file.sizeKb }))
+      : [],
+    appleHealth: summary?.appleHealth || null,
+  };
+
+  if (summary?.whoopCycles) {
+    compact.whoopCycles = {
+      totalEntries: summary.whoopCycles.totalEntries,
+      recentAverageRecovery: summary.whoopCycles.recentAverageRecovery,
+      recentAverageHrv: summary.whoopCycles.recentAverageHrv,
+      recentAverageRhr: summary.whoopCycles.recentAverageRhr,
+      recentAverageStrain: summary.whoopCycles.recentAverageStrain,
+      lowestRecoveryDays: sliceRows(summary.whoopCycles.lowestRecoveryDays, 5),
+      recentRows: sliceRows(summary.whoopCycles.recentRows, wantsSleep || wantsTraining ? 14 : 8),
+    };
+  }
+
+  if (summary?.sleeps && wantsSleep) {
+    compact.sleeps = {
+      totalEntries: summary.sleeps.totalEntries,
+      nightsTracked: summary.sleeps.nightsTracked,
+      recentAverageSleepHours: summary.sleeps.recentAverageSleepHours,
+      recentAverageSleepPerformance: summary.sleeps.recentAverageSleepPerformance,
+      recentAverageSleepEfficiency: summary.sleeps.recentAverageSleepEfficiency,
+      recentAverageRespiratoryRate: summary.sleeps.recentAverageRespiratoryRate,
+      recentRows: sliceRows(summary.sleeps.recentRows, 14),
+    };
+  }
+
+  if (summary?.whoopWorkouts && wantsTraining) {
+    compact.whoopWorkouts = {
+      totalEntries: summary.whoopWorkouts.totalEntries,
+      recentRows: sliceRows(summary.whoopWorkouts.recentRows, 12),
+    };
+  }
+
+  if (summary?.strong && wantsTraining) {
+    compact.strong = {
+      totalRows: summary.strong.totalRows,
+      sessionsTracked: summary.strong.sessionsTracked,
+      recentSessions: sliceRows(summary.strong.recentSessions, 10),
+      topExercises: sliceRows(summary.strong.topExercises, 8),
+    };
+  }
+
+  if (summary?.routes && wantsRoutes) {
+    compact.routes = {
+      totalRoutes: summary.routes.totalRoutes,
+      recentRoutes: sliceRows(summary.routes.recentRoutes, 6),
+    };
+  }
+
+  if (summary?.journal && wantsJournal) {
+    compact.journal = {
+      totalEntries: summary.journal.totalEntries,
+      recentRows: sliceRows(summary.journal.recentRows, 16),
+    };
+  }
+
+  return compact;
+}
+
+async function requestGemini(apiKey, systemInstruction, prompt, overrides = {}, model = MODEL) {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -71,7 +149,7 @@ async function requestGemini(apiKey, systemInstruction, prompt, overrides = {}) 
   });
 
   const payload = await response.json();
-  return { response, payload, answer: extractText(payload), finishReason: getFinishReason(payload) };
+  return { response, payload, answer: extractText(payload), finishReason: getFinishReason(payload), model };
 }
 
 exports.handler = async function handler(event) {
@@ -120,6 +198,8 @@ exports.handler = async function handler(event) {
     "Do not provide diagnosis or emergency medical advice.",
   ].join(" ");
 
+  const compactSummary = compactDatasetSummary(datasetSummary, question);
+
   const userPrompt = {
     task: "Answer the user's question using only the uploaded fitness data summary.",
     answer_style: {
@@ -141,13 +221,17 @@ exports.handler = async function handler(event) {
       "speculative causal claims",
       "headings, tables, emojis, or roleplay",
     ],
-    datasetSummary,
+    datasetSummary: compactSummary,
     conversation,
     question,
   };
 
   try {
-    let { response, payload, answer, finishReason } = await requestGemini(apiKey, systemInstruction, userPrompt);
+    let { response, payload, answer, finishReason, model: usedModel } = await requestGemini(
+      apiKey,
+      systemInstruction,
+      userPrompt
+    );
 
     if (!response.ok) {
       return json(response.status, {
@@ -161,9 +245,16 @@ exports.handler = async function handler(event) {
         "Rewrite the answer from scratch as exactly 3 complete sentences.",
         "No bullets, no markdown, no line breaks between sentences, and do not end mid-thought.",
       ].join(" ");
-      const fallback = await requestGemini(apiKey, fallbackInstruction, { datasetSummary, question }, { temperature: 0.1 });
+      const fallback = await requestGemini(
+        apiKey,
+        fallbackInstruction,
+        { datasetSummary: compactSummary, question },
+        { temperature: 0.1 },
+        FALLBACK_MODEL
+      );
       if (fallback.response.ok && fallback.answer && !looksTruncated(fallback.answer, fallback.finishReason)) {
         answer = fallback.answer;
+        usedModel = fallback.model;
       }
     }
 
@@ -171,7 +262,7 @@ exports.handler = async function handler(event) {
       return json(502, { error: "Gemini returned an empty response." });
     }
 
-    return json(200, { answer, model: MODEL });
+    return json(200, { answer, model: usedModel || MODEL });
   } catch (error) {
     return json(500, {
       error: error instanceof Error ? error.message : "Unknown server error.",
