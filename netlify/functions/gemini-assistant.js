@@ -49,16 +49,37 @@ function sliceRows(rows, limit) {
   return Array.isArray(rows) ? rows.slice(0, limit) : [];
 }
 
-function compactDatasetSummary(summary, question) {
-  const q = String(question || "").toLowerCase();
-  const wantsSleep = /(sleep|recovery|hrv|rhr|resting heart)/.test(q);
-  const wantsTraining = /(workout|lift|lifting|strain|strong|exercise|volume|pr|load|recovery)/.test(q);
-  const wantsRoutes = /(route|run|walk|cardio|steps|activity|vo2|gpx)/.test(q);
-  const wantsJournal = /(journal|creatine|supplement|vitamin|caffeine|habit)/.test(q);
+function buildContextText(question, conversation) {
+  const recentQuestions = Array.isArray(conversation)
+    ? conversation
+        .filter((message) => message?.role === "user")
+        .map((message) => String(message.text || "").trim())
+        .filter(Boolean)
+        .slice(-3)
+    : [];
+  return [question, ...recentQuestions].join(" ").toLowerCase();
+}
+
+function isActionQuestion(text) {
+  return /(recommend|what should i do|what do i do|what to do|focus on|next step|what else|how should i|what can i do)/.test(
+    String(text || "").toLowerCase()
+  );
+}
+
+function compactDatasetSummary(summary, question, conversation) {
+  const contextText = buildContextText(question, conversation);
+  const wantsAction = isActionQuestion(question) || isActionQuestion(contextText);
+  const wantsSleep = wantsAction || /(sleep|recovery|hrv|rhr|resting heart)/.test(contextText);
+  const wantsTraining = wantsAction || /(workout|lift|lifting|strain|strong|exercise|volume|pr|load|recovery)/.test(contextText);
+  const wantsRoutes = /(route|run|walk|cardio|steps|activity|vo2|gpx)/.test(contextText);
+  const wantsJournal = wantsAction || /(journal|creatine|supplement|vitamin|caffeine|habit)/.test(contextText);
 
   const compact = {
     generatedAt: summary?.generatedAt,
     latestDate: summary?.latestDate,
+    intent: {
+      wantsAction,
+    },
     files: Array.isArray(summary?.files)
       ? summary.files.map((file) => ({ name: file.name, sizeKb: file.sizeKb }))
       : [],
@@ -190,6 +211,8 @@ exports.handler = async function handler(event) {
     "For claims about trends, changes, highs, lows, or comparisons, cite the exact date or explicit date range and the relevant metric whenever available.",
     "Use absolute dates like 'Mar 14, 2026' when possible, not vague phrases like 'recently' unless you also name the dates.",
     "If the data does not support a claim, say so plainly and name what is missing.",
+    "If the user asks what to do, what to focus on, or for recommendations, give 1 to 2 concrete next steps grounded in the data even if the dataset contains no explicit recommendation field.",
+    "For action questions, prioritize the clearest bottleneck or risk signal in the provided data rather than refusing because guidance is not explicitly present.",
     "Do not speculate about causes, diagnoses, readiness, or future outcomes beyond the data provided.",
     "Do not output confidence scores, confidence labels, probabilities, hype, praise, emojis, markdown tables, headings, bullets, asterisks, or self-referential AI disclaimers.",
     "Do not give generic advice unless the user explicitly asks what to do.",
@@ -198,17 +221,24 @@ exports.handler = async function handler(event) {
     "Do not provide diagnosis or emergency medical advice.",
   ].join(" ");
 
-  const compactSummary = compactDatasetSummary(datasetSummary, question);
+  const compactSummary = compactDatasetSummary(datasetSummary, question, conversation);
 
   const userPrompt = {
     task: "Answer the user's question using only the uploaded fitness data summary.",
+    intent: {
+      actionRequest: compactSummary.intent?.wantsAction || false,
+      note:
+        compactSummary.intent?.wantsAction
+          ? "User is explicitly asking what to do next. Give 1-2 concrete, grounded recommendations."
+          : "Answer the question directly without extra recommendations unless asked.",
+    },
     answer_style: {
       persona: "supportive, direct, low-ego, evidence-first coach",
       format: "plain text only",
       requirements: [
         "First sentence directly answers the question.",
         "Support with 1-3 concrete observations tied to exact dates/date ranges and metrics when available.",
-        "Only include up to 2 actions if the user explicitly asked what to do.",
+        "If the user asked what to do, include 1-2 concrete next steps tied to the most relevant metrics or dates.",
         "Call out uncertainty or omitted data explicitly.",
         "Avoid headings, markdown emphasis syntax, and bullet lists.",
         "Use complete sentences and end with punctuation.",
