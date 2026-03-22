@@ -66,6 +66,24 @@ function isActionQuestion(text) {
   );
 }
 
+function getPreviousUserQuestion(question, conversation) {
+  const current = String(question || "").trim().toLowerCase();
+  const recentQuestions = Array.isArray(conversation)
+    ? conversation
+        .filter((message) => message?.role === "user")
+        .map((message) => String(message.text || "").trim())
+        .filter(Boolean)
+    : [];
+
+  for (let index = recentQuestions.length - 1; index >= 0; index -= 1) {
+    const candidate = recentQuestions[index];
+    if (candidate.toLowerCase() !== current) {
+      return candidate;
+    }
+  }
+  return "";
+}
+
 function compactDatasetSummary(summary, question, conversation) {
   const contextText = buildContextText(question, conversation);
   const wantsAction = isActionQuestion(question) || isActionQuestion(contextText);
@@ -222,14 +240,16 @@ exports.handler = async function handler(event) {
   ].join(" ");
 
   const compactSummary = compactDatasetSummary(datasetSummary, question, conversation);
+  const previousUserQuestion = getPreviousUserQuestion(question, conversation);
 
   const userPrompt = {
     task: "Answer the user's question using only the uploaded fitness data summary.",
     intent: {
       actionRequest: compactSummary.intent?.wantsAction || false,
+      previousUserQuestion,
       note:
         compactSummary.intent?.wantsAction
-          ? "User is explicitly asking what to do next. Give 1-2 concrete, grounded recommendations."
+          ? "User is explicitly asking what to do next. Give 1-2 concrete, grounded recommendations. If the question is generic, use the previous user question to infer the topic."
           : "Answer the question directly without extra recommendations unless asked.",
     },
     answer_style: {
@@ -239,6 +259,7 @@ exports.handler = async function handler(event) {
         "First sentence directly answers the question.",
         "Support with 1-3 concrete observations tied to exact dates/date ranges and metrics when available.",
         "If the user asked what to do, include 1-2 concrete next steps tied to the most relevant metrics or dates.",
+        "If the current question is a generic follow-up like 'what else should I do', anchor the advice to the previous user question's topic before broadening out.",
         "Call out uncertainty or omitted data explicitly.",
         "Avoid headings, markdown emphasis syntax, and bullet lists.",
         "Use complete sentences and end with punctuation.",
