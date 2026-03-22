@@ -423,6 +423,7 @@
   const inputEl = shell.querySelector("[data-ai-input]");
   const sendEl = shell.querySelector("[data-ai-send]");
   const suggestionsEl = shell.querySelector("[data-ai-suggestions]");
+  const suggestionsWrapEl = suggestionsEl.parentElement;
 
   consentEl.checked = state.consent;
   consentCardEl.dataset.checked = String(state.consent);
@@ -992,7 +993,7 @@
     if (state.isSending) {
       messagesEl.appendChild(createThinkingElement());
     }
-    suggestionsEl.dataset.hidden = state.messages.length > 0 ? "true" : "false";
+    suggestionsWrapEl.dataset.hidden = state.messages.length > 0 ? "true" : "false";
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
